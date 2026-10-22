@@ -1,0 +1,5 @@
+/dist/
+/terraform-provider-apigw-openapi
+*.test
+.terraform/
+.terraform.lock.hcl
