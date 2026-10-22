@@ -1,0 +1,370 @@
+[
+  {
+    "name": "basic/alb-authorizer",
+    "spec": "specs/basic.yaml",
+    "options": {
+      "integration": {
+        "base_uri": "http://svc.example.com/api",
+        "connection_id": "vpclink-a",
+        "integration_target": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/internal/vpclink-a",
+        "preserve_forwarded_host": true
+      },
+      "authorizer": {
+        "security_scheme": "TokenAuthorizer",
+        "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:123456789012:function:token-authorizer/invocations",
+        "credentials": "arn:aws:iam::123456789012:role/authorizer",
+        "result_ttl_in_seconds": 0,
+        "identity_validation_expression": "^Bearer [-0-9a-zA-Z\\._]*$",
+        "request_headers": [
+          {
+            "name": "x-auth-operator-id",
+            "value": "context.authorizer.operatorId"
+          },
+          {
+            "name": "x-auth-company-id",
+            "value": "context.authorizer.companyId"
+          },
+          {
+            "name": "x-auth-whitelabel",
+            "value": "context.authorizer.whiteLabel"
+          },
+          {
+            "name": "Authorization",
+            "value": "context.authorizer.token"
+          },
+          {
+            "name": "x-auth-organisation_id",
+            "value": "context.authorizer.organisation_id"
+          },
+          {
+            "name": "x-auth-workspace_id",
+            "value": "context.authorizer.workspace_id"
+          },
+          {
+            "name": "x-auth-credential_id",
+            "value": "context.authorizer.credential_id"
+          },
+          {
+            "name": "x-auth-scope",
+            "value": "context.authorizer.scope"
+          }
+        ]
+      },
+      "excluded_paths": [
+        "/v2/hidden"
+      ],
+      "catch_all_not_found": true
+    },
+    "expected": "expected/basic/alb-authorizer.json"
+  },
+  {
+    "name": "basic/nlb-strip-prefix",
+    "spec": "specs/basic.yaml",
+    "options": {
+      "integration": {
+        "base_uri": "http://nlb.example.com:8080",
+        "connection_id": "vpclink-v1",
+        "preserve_forwarded_host": false
+      },
+      "strip_prefix": "/v2",
+      "catch_all_not_found": true
+    },
+    "expected": "expected/basic/nlb-strip-prefix.json"
+  },
+  {
+    "name": "basic/secondary-rewrites",
+    "spec": "specs/basic.yaml",
+    "options": {
+      "integration": {
+        "base_uri": "http://one.example.com",
+        "connection_id": "vpclink-a",
+        "integration_target": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/internal/vpclink-a",
+        "ignored_paths": [
+          "/v2/things/"
+        ],
+        "preserve_forwarded_host": true
+      },
+      "secondary_integration": {
+        "base_uri": "http://two.example.com",
+        "connection_id": "vpclink-b",
+        "integration_target": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/internal/vpclink-b",
+        "paths": [
+          "/v2/charging/"
+        ],
+        "ignored_paths": [
+          "/v2/charging/sessions/internal"
+        ],
+        "preserve_forwarded_host": false
+      },
+      "authorizer": {
+        "security_scheme": "TokenAuthorizer",
+        "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:123456789012:function:token-authorizer/invocations",
+        "credentials": "arn:aws:iam::123456789012:role/authorizer",
+        "result_ttl_in_seconds": 300,
+        "identity_validation_expression": "^Bearer [-0-9a-zA-Z\\._]*$",
+        "request_headers": [
+          {
+            "name": "x-auth-operator-id",
+            "value": "context.authorizer.operatorId"
+          },
+          {
+            "name": "x-auth-company-id",
+            "value": "context.authorizer.companyId"
+          },
+          {
+            "name": "x-auth-whitelabel",
+            "value": "context.authorizer.whiteLabel"
+          },
+          {
+            "name": "Authorization",
+            "value": "context.authorizer.token"
+          },
+          {
+            "name": "x-auth-organisation_id",
+            "value": "context.authorizer.organisation_id"
+          },
+          {
+            "name": "x-auth-workspace_id",
+            "value": "context.authorizer.workspace_id"
+          },
+          {
+            "name": "x-auth-credential_id",
+            "value": "context.authorizer.credential_id"
+          },
+          {
+            "name": "x-auth-scope",
+            "value": "context.authorizer.scope"
+          }
+        ]
+      },
+      "path_rewrites": {
+        "/v2/alias": "/v2/real/$1/$$/$&/$`",
+        "/v2/charging/sessions": "/sessions"
+      },
+      "catch_all_not_found": true
+    },
+    "expected": "expected/basic/secondary-rewrites.json"
+  },
+  {
+    "name": "basic/no-integration",
+    "spec": "specs/basic.yaml",
+    "options": {
+      "authorizer": {
+        "security_scheme": "TokenAuthorizer",
+        "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:123456789012:function:token-authorizer/invocations",
+        "credentials": "arn:aws:iam::123456789012:role/authorizer",
+        "result_ttl_in_seconds": 0,
+        "identity_validation_expression": "^Bearer [-0-9a-zA-Z\\._]*$",
+        "request_headers": [
+          {
+            "name": "x-auth-operator-id",
+            "value": "context.authorizer.operatorId"
+          },
+          {
+            "name": "x-auth-company-id",
+            "value": "context.authorizer.companyId"
+          },
+          {
+            "name": "x-auth-whitelabel",
+            "value": "context.authorizer.whiteLabel"
+          },
+          {
+            "name": "Authorization",
+            "value": "context.authorizer.token"
+          },
+          {
+            "name": "x-auth-organisation_id",
+            "value": "context.authorizer.organisation_id"
+          },
+          {
+            "name": "x-auth-workspace_id",
+            "value": "context.authorizer.workspace_id"
+          },
+          {
+            "name": "x-auth-credential_id",
+            "value": "context.authorizer.credential_id"
+          },
+          {
+            "name": "x-auth-scope",
+            "value": "context.authorizer.scope"
+          }
+        ]
+      },
+      "catch_all_not_found": true
+    },
+    "expected": "expected/basic/no-integration.json"
+  },
+  {
+    "name": "yaml-semantics/alb",
+    "spec": "specs/yaml-semantics.yaml",
+    "options": {
+      "integration": {
+        "base_uri": "http://svc.example.com",
+        "connection_id": "vpclink-a",
+        "integration_target": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/internal/vpclink-a",
+        "preserve_forwarded_host": false
+      },
+      "catch_all_not_found": true
+    },
+    "expected": "expected/yaml-semantics/alb.json"
+  },
+  {
+    "name": "refs/alb-authorizer",
+    "spec": "specs/refs.yaml",
+    "options": {
+      "integration": {
+        "base_uri": "http://svc.example.com",
+        "connection_id": "vpclink-a",
+        "integration_target": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/internal/vpclink-a",
+        "preserve_forwarded_host": true
+      },
+      "authorizer": {
+        "security_scheme": "TokenAuthorizer",
+        "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:123456789012:function:token-authorizer/invocations",
+        "credentials": "arn:aws:iam::123456789012:role/authorizer",
+        "result_ttl_in_seconds": 0,
+        "identity_validation_expression": "^Bearer [-0-9a-zA-Z\\._]*$",
+        "request_headers": [
+          {
+            "name": "x-auth-operator-id",
+            "value": "context.authorizer.operatorId"
+          },
+          {
+            "name": "x-auth-company-id",
+            "value": "context.authorizer.companyId"
+          },
+          {
+            "name": "x-auth-whitelabel",
+            "value": "context.authorizer.whiteLabel"
+          },
+          {
+            "name": "Authorization",
+            "value": "context.authorizer.token"
+          },
+          {
+            "name": "x-auth-organisation_id",
+            "value": "context.authorizer.organisation_id"
+          },
+          {
+            "name": "x-auth-workspace_id",
+            "value": "context.authorizer.workspace_id"
+          },
+          {
+            "name": "x-auth-credential_id",
+            "value": "context.authorizer.credential_id"
+          },
+          {
+            "name": "x-auth-scope",
+            "value": "context.authorizer.scope"
+          }
+        ]
+      },
+      "catch_all_not_found": true
+    },
+    "expected": "expected/refs/alb-authorizer.json"
+  },
+  {
+    "name": "strip/prefix",
+    "spec": "specs/strip.yaml",
+    "options": {
+      "integration": {
+        "base_uri": "http://svc.example.com",
+        "connection_id": "vpclink-a",
+        "integration_target": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/internal/vpclink-a",
+        "preserve_forwarded_host": false
+      },
+      "strip_prefix": "/v2",
+      "catch_all_not_found": true
+    },
+    "expected": "expected/strip/prefix.json"
+  },
+  {
+    "name": "strip/empty-prefix",
+    "spec": "specs/strip.yaml",
+    "options": {
+      "integration": {
+        "base_uri": "http://svc.example.com",
+        "connection_id": "vpclink-a",
+        "integration_target": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/internal/vpclink-a",
+        "preserve_forwarded_host": false
+      },
+      "authorizer": {
+        "security_scheme": "TokenAuthorizer",
+        "uri": "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:123456789012:function:token-authorizer/invocations",
+        "credentials": "arn:aws:iam::123456789012:role/authorizer",
+        "result_ttl_in_seconds": 0,
+        "identity_validation_expression": "^Bearer [-0-9a-zA-Z\\._]*$",
+        "request_headers": [
+          {
+            "name": "x-auth-operator-id",
+            "value": "context.authorizer.operatorId"
+          },
+          {
+            "name": "x-auth-company-id",
+            "value": "context.authorizer.companyId"
+          },
+          {
+            "name": "x-auth-whitelabel",
+            "value": "context.authorizer.whiteLabel"
+          },
+          {
+            "name": "Authorization",
+            "value": "context.authorizer.token"
+          },
+          {
+            "name": "x-auth-organisation_id",
+            "value": "context.authorizer.organisation_id"
+          },
+          {
+            "name": "x-auth-workspace_id",
+            "value": "context.authorizer.workspace_id"
+          },
+          {
+            "name": "x-auth-credential_id",
+            "value": "context.authorizer.credential_id"
+          },
+          {
+            "name": "x-auth-scope",
+            "value": "context.authorizer.scope"
+          }
+        ]
+      },
+      "strip_prefix": "",
+      "catch_all_not_found": true
+    },
+    "expected": "expected/strip/empty-prefix.json"
+  },
+  {
+    "name": "basic/unknown-excluded-path",
+    "spec": "specs/basic.yaml",
+    "options": {
+      "excluded_paths": [
+        "/nope"
+      ],
+      "catch_all_not_found": true
+    },
+    "expected": null
+  },
+  {
+    "name": "basic/unknown-rewrite",
+    "spec": "specs/basic.yaml",
+    "options": {
+      "path_rewrites": {
+        "/nope": "/x"
+      },
+      "catch_all_not_found": true
+    },
+    "expected": null
+  },
+  {
+    "name": "basic/rewrite-without-integration",
+    "spec": "specs/basic.yaml",
+    "options": {
+      "path_rewrites": {
+        "/v2/alias": "/x"
+      },
+      "catch_all_not_found": true
+    },
+    "expected": null
+  }
+]

@@ -1,0 +1,43 @@
+# Scalars and key order as resolved by a YAML 1.2 core schema in JavaScript.
+openapi: 3.0.3
+info:
+  title: "Quotes \" and \\ backslash, tab\tand   é \U0001F600 <html> & 'single'"
+  version: 1.0
+  description: |
+    Literal block
+      keeps indentation
+    and a trailing newline
+  summary: >
+    Folded
+    block
+  x-numbers: [0, -0, 1, +2, 007, 0o17, 0x1F, 1.50, .5, 1., 1e3, 1.5E-7, 0.000001, 1e21, 123456789012345678901, 9007199254740993, .inf, -.Inf, .nan, 1_000, 0x, 12:30]
+  x-bools: [true, True, TRUE, false, yes, no, on, off, y, n]
+  x-nulls: [~, null, Null, NULL, "null"]
+  x-empty:
+  x-strings: ['123', "true", !!str 42, !!int "12", !!float 3, !!null x, ! 5, 2001-12-14]
+  x-keys:
+    b: 1
+    2: two
+    a: 2
+    1: one
+    "10": ten
+    4294967295: big
+    -1: minus
+    true: t
+    ~: n
+    1.5: f
+  x-anchor: &anchor
+    shared: yes
+  x-alias: *anchor
+  x-merge:
+    <<: *anchor
+    own: 1
+  x-flow: {a: [1, 2, {b: c}], "d e": f}
+  x-control: "\x01\x1f\x7f\b\f\r\n"
+  x-raw-breaks: ["a bc", plain text]
+paths:
+  /a:
+    get:
+      responses:
+        "200":
+          description: ok

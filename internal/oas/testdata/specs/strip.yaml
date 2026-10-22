@@ -1,0 +1,40 @@
+# strip_prefix moves paths: replaced keys go to the end, and a collision keeps the later one.
+openapi: 3.0.3
+info:
+  title: Strip
+  version: "1"
+paths:
+  /v2/first:
+    get:
+      responses:
+        "200":
+          description: first
+    post:
+      responses:
+        "200":
+          description: first-post
+  /no-prefix:
+    get:
+      responses:
+        "200":
+          description: unchanged
+  /v2/x/v2/twice:
+    get:
+      responses:
+        "200":
+          description: only the first occurrence
+  /v2/collide:
+    get:
+      responses:
+        "200":
+          description: from v2
+  /collide:
+    put:
+      responses:
+        "200":
+          description: plain
+  /options-only:
+    options:
+      responses:
+        "200":
+          description: no http method, stays

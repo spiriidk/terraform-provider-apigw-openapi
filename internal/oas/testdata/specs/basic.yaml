@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Example
+  version: "1.0"
+paths:
+  /v2/things/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getThing
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Thing"
+        "404":
+          description: missing
+        default:
+          description: error
+    delete:
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "204":
+          description: gone
+    options:
+      responses:
+        "200":
+          description: cors
+  /v2/things:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Thing"
+      responses:
+        "201":
+          description: created
+    GET:
+      parameters: []
+      responses:
+        "200":
+          description: upper-case method key
+  /v2/charging/sessions:
+    post:
+      responses:
+        "201":
+          description: created
+  /v2/charging/sessions/internal:
+    get:
+      security:
+        - other: []
+      responses:
+        "200":
+          description: ok
+  /v2/mixed/{id}:
+    get:
+      security:
+        - other: []
+        - TokenAuthorizer: []
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: either scheme; the authorizer context is mapped
+  /v2/alias:
+    get:
+      responses:
+        "200":
+          description: ok
+    put:
+      responses:
+        "200":
+          description: ok
+  /v2/hidden:
+    get:
+      responses:
+        "200":
+          description: ok
+  /v2/custom:
+    get:
+      responses:
+        "200":
+          description: ok
+      x-amazon-apigateway-integration:
+        type: MOCK
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+  /{proxy+}:
+    get:
+      responses:
+        "200":
+          description: user-defined catch-all
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Thing:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        size:
+          type: number
+          minimum: 0.5
+          maximum: 1e21
+        parent:
+          $ref: "#/components/schemas/Parent"
+    Parent:
+      type: object
+      properties:
+        name:
+          type: string
+  securitySchemes:
+    other:
+      type: apiKey
+      name: x-api-key
+      in: header
