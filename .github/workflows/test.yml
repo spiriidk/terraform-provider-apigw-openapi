@@ -47,3 +47,11 @@ jobs:
           terraform_wrapper: false
       - run: go test -race -count=1 ./...
       - run: go test -run '^$' -fuzz FuzzRender -fuzztime 30s ./internal/oas/
+
+  # The one required status check: the ruleset doesn't track job or matrix names.
+  ci:
+    if: always()
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.build.result }}" = success && test "${{ needs.test.result }}" = success
