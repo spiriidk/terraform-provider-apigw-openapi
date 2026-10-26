@@ -1,11 +1,11 @@
 # terraform-provider-apigw-openapi
 
-Terraform provider with one function, `rest_api_body`, that renders an Amazon API Gateway
+A Terraform provider with one function, `rest_api_body`. It renders an Amazon API Gateway
 REST API body from an OpenAPI document: local `$ref`s inlined, `HTTP_PROXY` integrations
 (VPC link v1 or v2), a Lambda token authorizer, path rewrites and a catch-all 404.
 
-Terraform alone can't do this: HCL has no recursion to inline `$ref`s, and `jsonencode`
-sorts keys, so every reorder would redeploy the API.
+Plain HCL can't do this: it has no recursion to inline `$ref`s, and `jsonencode` sorts
+keys, so the body would change, and the API redeploy, whenever key order differs.
 
 ```terraform
 terraform {
@@ -28,36 +28,35 @@ resource "aws_api_gateway_rest_api" "this" {
 }
 ```
 
-Requires Terraform 1.8 or later. Full reference: [docs/functions/rest_api_body.md](docs/functions/rest_api_body.md).
+Requires Terraform 1.8 or later. Reference: [docs/functions/rest_api_body.md](docs/functions/rest_api_body.md).
 
 ## Compatibility
 
 Output matches, byte for byte, a JavaScript implementation that parses with the `yaml`
-npm package and serialises with `JSON.stringify`: YAML 1.2 core schema, JavaScript property
-order (integer-like keys first, then insertion order) and JavaScript number formatting.
-The golden tests in `internal/oas/testdata` hold it to that.
+npm package and serialises with `JSON.stringify`: YAML 1.2 core schema, JavaScript
+property order (integer-like keys first) and number formatting. The golden tests in
+`internal/oas/testdata` pin this.
 
-Known differences, both for input that is unusual in OpenAPI documents:
-
-- Collection map keys (`? [a, b]: c`) are rejected.
-- `!!binary`, `!!timestamp`, `!!set`, `!!omap` and `!!pairs` tags are rejected.
+Rejected, though rare in OpenAPI documents: collection map keys (`? [a, b]: c`), the
+`!!binary`, `!!timestamp`, `!!set`, `!!omap` and `!!pairs` tags, and bodies over 64 MiB.
 
 ## Development
 
 ```sh
-go test ./...                 # needs terraform >= 1.8 on PATH for the function tests
-go generate ./...             # regenerates docs/
+go test ./...        # function tests need terraform >= 1.8 on PATH
+go generate ./...    # regenerates docs/
 go test -run '^$' -fuzz FuzzRender ./internal/oas/
 ```
 
-`PARITY_CASES=<cases.json> go test ./internal/oas/ -run TestParity` compares against
-bodies produced elsewhere, in the format of `internal/oas/testdata/cases.json`.
+To compare with bodies produced elsewhere, write a cases file in the format of
+`internal/oas/testdata/cases.json` and run
+`PARITY_CASES=<file> go test ./internal/oas/ -run TestParity`.
 
 ## Releasing
 
 Push a `vX.Y.Z` tag. The release workflow builds with GoReleaser and signs the checksums
-with the GPG key in the `GPG_PRIVATE_KEY` and `PASSPHRASE` secrets; the Terraform Registry
-picks the release up from there.
+with the GPG key in the `GPG_PRIVATE_KEY` and `PASSPHRASE` secrets; the Terraform
+Registry publishes the release from there.
 
 ## License
 

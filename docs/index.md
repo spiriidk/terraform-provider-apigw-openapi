@@ -1,0 +1,25 @@
+---
+page_title: "apigw-openapi Provider"
+description: |-
+  Renders Amazon API Gateway REST API bodies from OpenAPI documents.
+---
+
+# apigw-openapi Provider
+
+A function-only provider. [`rest_api_body`](functions/rest_api_body.md) turns an OpenAPI
+document into the body of an `aws_api_gateway_rest_api`: local `$ref`s are inlined, and
+integrations, a Lambda token authorizer and a catch-all 404 are added.
+
+The provider has no configuration and makes no network calls. Provider functions need
+Terraform 1.8 or later.
+
+```terraform
+terraform {
+  required_providers {
+    apigw-openapi = {
+      source  = "spiriidk/apigw-openapi"
+      version = "~> 0.1"
+    }
+  }
+}
+```

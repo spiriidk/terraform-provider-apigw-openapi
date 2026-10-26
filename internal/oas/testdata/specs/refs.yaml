@@ -1,0 +1,75 @@
+# $ref edge cases: shared targets, chains, refs into arrays, refs before targets.
+components:
+  schemas:
+    First:
+      $ref: "#/components/schemas/Second"
+    Second:
+      type: object
+      properties:
+        list:
+          $ref: "#/components/x-lists/one"
+        third:
+          $ref: "#/components/schemas/Third"
+    Third:
+      type: string
+      enum: [a, b]
+  x-lists:
+    one:
+      - $ref: "#/components/schemas/Third"
+      - plain
+  x-path-items:
+    shared:
+      get:
+        parameters:
+          - in: path
+            name: shared
+        responses:
+          "200":
+            description: shared
+  x-items:
+    - name: zero
+    - name: one
+  parameters:
+    pathId:
+      in: path
+      name: 7
+      required: true
+openapi: 3.0.3
+info:
+  title: Refs
+  version: "1"
+paths:
+  /chain:
+    get:
+      parameters:
+        - $ref: "#/components/parameters/pathId"
+        - in: path
+          name: ""
+        - null
+        - in: header
+          name: x
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/First"
+  /array-index:
+    get:
+      responses:
+        "200":
+          description:
+            $ref: "#/components/x-items/1/name"
+          x-length:
+            $ref: "#/components/x-items/length"
+  /shared-a:
+    $ref: "#/components/x-path-items/shared"
+  /shared-b:
+    $ref: "#/components/x-path-items/shared"
+  /x-only-params:
+    parameters:
+      - in: path
+        name: unused
+x-tail:
+  ok: true

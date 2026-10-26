@@ -3,3 +3,6 @@
 *.test
 .terraform/
 .terraform.lock.hcl
+.idea/
+.vscode/
+.DS_Store
